@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国际部高中生职业选择测评</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // Tailwind 配置
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F4C81',      // 主色调-深蓝
+                        secondary: '#2563EB',    // 辅助色
+                        neutral: '#F1F5F9',      // 背景色
+                        dark: '#1E293B',         // 文字深色
+                        success: '#10B981',      // 回报率高-绿色
+                        warning: '#F59E0B',      // 回报率中-黄色
+                        danger: '#EF4444',       // 回报率低-红色
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(15, 76, 129, 0.15);
+            }
+            .btn-hover {
+                @apply transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5;
+            }
+            .checkbox-checked {
+                @apply bg-primary border-primary text-white;
+            }
+            .roi-high {
+                @apply bg-success/10 border-success text-success;
+            }
+            .roi-medium {
+                @apply bg-warning/10 border-warning text-warning;
+            }
+            .roi-low {
+                @apply bg-danger/10 border-danger text-danger;
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral min-h-screen font-sans text-dark">
+    <!-- 顶部导航 -->
+    <header class="bg-primary text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-graduation-cap text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold">国际部职业测评</h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-4">
+                <span id="progress-text" class="text-sm md:text-base">进度: 0/40题</span>
+                <div class="w-48 bg-white/20 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-secondary h-2.5 rounded-full w-0 transition-all duration-500"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        <!-- 欢迎页面 -->
+        <section id="welcome-section" class="block">
+            <div class="bg-white rounded-2xl p-6 md:p-10 card-shadow max-w-3xl mx-auto">
+                <div class="text-center mb-8">
+                    <i class="fa fa-compass text-5xl text-primary mb-4"></i>
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">国际部高中生职业选择测评</h2>
+                    <p class="text-lg text-gray-600 mb-6">
+                        发现你的兴趣优势，匹配最佳留学专业与职业方向
+                    </p>
+                </div>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <i class="fa fa-check-circle text-secondary mt-1"></i>
+                        <p>40道专业测评题，全面分析你的兴趣、能力与留学意向</p>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fa fa-check-circle text-secondary mt-1"></i>
+                        <p>智能匹配3个最适合你的职业方向与海外大学专业</p>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fa fa-check-circle text-secondary mt-1"></i>
+                        <p>AI顾问支持多场景问答，解答留学/学习/职业相关所有问题</p>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <i class="fa fa-check-circle text-secondary mt-1"></i>
+                        <p>专业薪资回报率分析，计算留学投资回报周期</p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button id="start-btn" class="bg-primary text-white px-8 py-3 rounded-lg font-bold text-lg btn-hover">
+                        开始测评 <i class="fa fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 测评页面 -->
+        <section id="quiz-section" class="hidden">
+            <div class="bg-white rounded-2xl p-6 md:p-8 card-shadow max-w-3xl mx-auto">
+                <div id="quiz-container" class="min-h-[400px]">
+                    <!-- 题目将通过JS动态加载 -->
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button id="prev-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium btn-hover hidden">
+                        <i class="fa fa-arrow-left mr-2"></i> 上一题
+                    </button>
+                    <button id="next-btn" class="bg-primary text-white px-6 py-2 rounded-lg font-medium btn-hover">
+                        下一题 <i class="fa fa-arrow-right ml-2"></i>
+                    </button>
+                    <button id="submit-btn" class="bg-secondary text-white px-6 py-2 rounded-lg font-medium btn-hover hidden">
+                        提交测评 <i class="fa fa-paper-plane ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 结果页面 -->
+        <section id="result-section" class="hidden">
+            <div class="bg-white rounded-2xl p-6 md:p-8 card-shadow max-w-4xl mx-auto">
+                <div class="text-center mb-8">
+                    <i class="fa fa-trophy text-4xl text-primary mb-4"></i>
+                    <h2 class="text-3xl font-bold text-primary">你的专属职业推荐</h2>
+                    <p class="text-gray-600 mt-2">根据你的测评结果，为你匹配了3个最佳职业方向</p>
+                </div>
+                
+                <!-- 结果卡片容器 -->
+                <div id="result-container" class="grid md:grid-cols-3 gap-6 mb-8">
+                    <!-- 结果通过JS动态生成 -->
+                </div>
+
+                <!-- 查看薪资回报率按钮 -->
+                <div class="text-center mb-8">
+                    <button id="view-roi-btn" class="bg-secondary text-white px-6 py-3 rounded-lg font-medium btn-hover">
+                        <i class="fa fa-line-chart mr-2"></i> 查看专业薪资回报率
+                    </button>
+                </div>
+
+                <!-- 重新选择模块 -->
+                <div class="bg-neutral rounded-xl p-6 mb-8">
+                    <h3 class="text-xl font-semibold text-primary mb-4">不满意结果？重新选择偏好</h3>
+                    <div class="grid md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-gray-700 mb-2">兴趣方向</label>
+                            <select id="reset-interest" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">请选择兴趣</option>
+                                <option value="动手实践">动手实践</option>
+                                <option value="逻辑思考">逻辑思考</option>
+                                <option value="创意设计">创意设计</option>
+                                <option value="人际沟通">人际沟通</option>
+                                <option value="商科分析">商科分析</option>
+                                <option value="金融管理">金融管理</option>
+                                <option value="经济分析">经济分析</option>
+                                <option value="物理工程">物理工程</option>
+                                <option value="生命科学">生命科学</option>
+                                <option value="人文社科">人文社科</option>
+                                <option value="艺术设计">艺术设计</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">AP考试科目 (可多选)</label>
+                            <div id="ap-subjects-multiselect" class="w-full border border-gray-300 rounded-lg p-2 h-[120px] overflow-y-auto">
+                                <div class="space-y-1">
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP微积分AB/BC" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP微积分AB/BC</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP物理1/2/C" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP物理1/2/C</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP化学" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP化学</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP生物" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP生物</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP经济学（宏观/微观）" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP经济学（宏观/微观）</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP统计学" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP统计学</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP计算机科学A/原理" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP计算机科学A/原理</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP心理学" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP心理学</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP历史（美国/世界/欧洲）" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP历史（美国/世界/欧洲）</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP英语语言与写作" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP英语语言与写作</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP艺术史" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP艺术史</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP环境科学" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP环境科学</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" value="AP艺术与设计" class="ap-checkbox rounded text-primary focus:ring-primary">
+                                        <span>AP艺术与设计</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">留学国家/地区</label>
+                            <select id="reset-country" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">请选择国家/地区</option>
+                                <option value="美国">美国</option>
+                                <option value="英国">英国</option>
+                                <option value="加拿大">加拿大</option>
+                                <option value="澳大利亚">澳大利亚</option>
+                                <option value="荷兰">荷兰</option>
+                                <option value="瑞士">瑞士</option>
+                                <option value="中国香港">中国香港</option>
+                                <option value="新加坡">新加坡</option>
+                                <option value="日本">日本</option>
+                                <option value="德国">德国</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button id="reset-btn" class="bg-secondary text-white px-6 py-3 rounded-lg font-medium btn-hover">
+                            重新生成结果 <i class="fa fa-refresh ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI顾问模块 -->
+                <div class="bg-primary/5 rounded-xl p-6 mb-8 border border-primary/20">
+                    <h3 class="text-xl font-semibold text-primary mb-4 flex items-center">
+                        <i class="fa fa-comments-o mr-2"></i> 留学职业AI顾问
+                    </h3>
+                    <div class="bg-white/50 rounded-lg p-3 mb-4 text-sm text-gray-700">
+                        <i class="fa fa-lightbulb-o text-primary mr-1"></i> 
+                        <strong>AI顾问能力范围：</strong>留学规划、职业选择、AP选课、院校推荐、学习方法、海外生活、语言备考、申请攻略、薪资回报率分析等
+                    </div>
+                    <div id="ai-chat-container" class="bg-white rounded-lg p-4 h-72 overflow-y-auto mb-4 border border-gray-200">
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex items-start">
+                                <div class="bg-primary/10 rounded-full w-8 h-8 flex items-center justify-center text-primary mr-2">
+                                    <i class="fa fa-robot"></i>
+                                </div>
+                                <div class="bg-neutral rounded-lg p-3 max-w-[80%]">
+                                    <p class="text-sm">你好！我是你的专属留学职业AI顾问，除了专业选择，我还能解答这些问题：<br>
+                                    1. 如何高效备考AP微积分？<br>
+                                    2. 美国艺术院校申请需要准备哪些作品集？<br>
+                                    3. 荷兰留学一年的费用大概是多少？<br>
+                                    4. 金融专业毕业后的就业前景如何？<br>
+                                    5. 国际部高中生如何平衡GPA和标化考试？<br>
+                                    6. 各专业留学的薪资回报率（ROI）是多少？</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <input type="text" id="ai-question-input" placeholder="输入你的任何问题，比如：AP微积分怎么备考？荷兰留学费用？金融专业ROI？" class="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        <button id="ai-send-btn" class="bg-primary text-white px-4 py-2 rounded-lg font-medium btn-hover">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button id="restart-btn" class="bg-primary/80 text-white px-6 py-2 rounded-lg font-medium btn-hover">
+                        <i class="fa fa-refresh mr-2"></i> 重新测评
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 新增：薪资回报率(ROI)页面 -->
+        <section id="roi-section" class="hidden">
+            <div class="bg-white rounded-2xl p-6 md:p-8 card-shadow max-w-5xl mx-auto">
+                <div class="text-center mb-8">
+                    <i class="fa fa-line-chart text-4xl text-primary mb-4"></i>
+                    <h2 class="text-3xl font-bold text-primary">专业薪资回报率分析 (ROI)</h2>
+                    <p class="text-gray-600 mt-2">基于留学成本与职业薪资，计算你的专业投资回报价值</p>
+                </div>
+
+                <!-- ROI计算说明 -->
+                <div class="bg-primary/5 rounded-xl p-4 mb-6 border border-primary/20">
+                    <h4 class="font-semibold text-primary mb-2 flex items-center">
+                        <i class="fa fa-info-circle mr-2"></i> ROI计算说明
+                    </h4>
+                    <p class="text-sm text-gray-700">
+                        投资回报率(ROI) = (毕业后年均薪资 × 工作年限 - 总留学成本) ÷ 总留学成本 × 100%<br>
+                        回本周期 = 总留学成本 ÷ (毕业后年均薪资 - 国内同水平薪资)<br>
+                        <strong>数据说明：</strong>薪资数据来自2025年QS全球毕业生就业报告、PayScale薪资调研，成本包含学费+生活费。
+                    </p>
+                </div>
+
+                <!-- 留学成本自定义设置 -->
+                <div class="bg-neutral rounded-xl p-6 mb-8">
+                    <h3 class="text-xl font-semibold text-primary mb-4">自定义你的留学成本</h3>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-gray-700 mb-2">留学国家/地区</label>
+                            <select id="roi-country" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="美国">美国</option>
+                                <option value="英国">英国</option>
+                                <option value="加拿大">加拿大</option>
+                                <option value="澳大利亚">澳大利亚</option>
+                                <option value="荷兰">荷兰</option>
+                                <option value="瑞士">瑞士</option>
+                                <option value="中国香港">中国香港</option>
+                                <option value="新加坡">新加坡</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">学制年限 (年)</label>
+                            <input type="number" id="roi-years" value="4" min="1" max="6" 
+                                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">年预算 (万元/年)</label>
+                            <input type="number" id="roi-budget" value="50" min="10" max="100" 
+                                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button id="calc-roi-btn" class="bg-primary text-white px-6 py-2 rounded-lg font-medium btn-hover">
+                            <i class="fa fa-calculator mr-2"></i> 重新计算ROI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 薪资回报率结果展示 -->
+                <div id="roi-result-container" class="grid md:grid-cols-3 gap-6 mb-8">
+                    <!-- ROI结果通过JS动态生成 -->
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="flex justify-center space-x-4">
+                    <button id="back-to-result-btn" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium btn-hover">
+                        <i class="fa fa-arrow-left mr-2"></i> 返回职业推荐
+                    </button>
+                    <button id="export-roi-btn" class="bg-secondary text-white px-6 py-2 rounded-lg font-medium btn-hover">
+                        <i class="fa fa-download mr-2"></i> 导出ROI报告
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2025 国际部高中生职业选择测评系统 | 专业留学规划工具</p>
+        </div>
+    </footer>
+
+    <script>
+        // 测评题目数据
+        const questions = [
+            // 基础兴趣方向 (8题)
+            {id:1, type:"interest", text:"你更喜欢动手制作或组装物品？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:2, type:"interest", text:"你喜欢分析问题、逻辑推理和思考抽象概念？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:3, type:"interest", text:"你喜欢创作绘画、设计、音乐或写作？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:4, type:"interest", text:"你喜欢与人交流、帮助他人和团队合作？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:5, type:"interest", text:"你愿意参加实验、操作仪器或实地调研活动？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:6, type:"interest", text:"你喜欢研究规律、数据统计和理性分析？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:7, type:"interest", text:"你经常有新奇的想法并想要实现它们？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:8, type:"interest", text:"你擅长说服、倾听和处理人际关系问题？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            
+            // 商科/金融/工程类兴趣 (12题)
+            {id:9, type:"interest", text:"你喜欢分析商业案例、研究市场趋势？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:10, type:"interest", text:"你关注金融市场动态，愿意学习投资和风险管理？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:11, type:"interest", text:"你擅长数据分析，能从数据中发现经济规律？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:12, type:"interest", text:"你喜欢设计工程方案，解决物理/机械类问题？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:13, type:"interest", text:"你愿意学习企业管理、财务规划相关知识？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:14, type:"interest", text:"你对宏观/微观经济政策和经济模型感兴趣？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:15, type:"interest", text:"你喜欢计算投资回报率、分析财务报表？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:16, type:"interest", text:"你擅长使用数学模型解决工程实际问题？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:17, type:"interest", text:"你关注国际贸易、跨境商业合作相关内容？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:18, type:"interest", text:"你愿意学习供应链管理、运营优化相关知识？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:19, type:"interest", text:"你对新能源工程、材料工程等前沿领域感兴趣？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:20, type:"interest", text:"你喜欢参与商业竞赛、创业项目策划？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            
+            // 艺术设计类兴趣 (4题)
+            {id:21, type:"interest", text:"你喜欢绘画、雕塑、摄影等视觉艺术创作？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:22, type:"interest", text:"你擅长平面设计、产品设计或空间设计？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:23, type:"interest", text:"你关注艺术史、美学理论和当代艺术趋势？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:24, type:"interest", text:"你愿意将艺术创作与商业、科技结合？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            
+            // AP考试科目 (12题)
+            {id:25, type:"subject", text:"你的AP微积分AB/BC成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:26, type:"subject", text:"你的AP物理1/2/C成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:27, type:"subject", text:"你的AP化学成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:28, type:"subject", text:"你的AP生物成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:29, type:"subject", text:"你的AP经济学（宏观/微观）成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:30, type:"subject", text:"你的AP统计学成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:31, type:"subject", text:"你的AP计算机科学A/原理成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:32, type:"subject", text:"你的AP心理学成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:33, type:"subject", text:"你的AP历史（美国/世界/欧洲）成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:34, type:"subject", text:"你的AP英语语言与写作成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:35, type:"subject", text:"你的AP艺术史成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:36, type:"subject", text:"你的AP艺术与设计成绩优异且喜欢学习？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            
+            // 留学国家 (8题)
+            {id:37, type:"country", text:"你倾向于选择美国作为留学国家？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:38, type:"country", text:"你倾向于选择英国作为留学国家？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:39, type:"country", text:"你倾向于选择加拿大/澳大利亚作为留学国家？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]},
+            {id:40, type:"country", text:"你倾向于选择荷兰/瑞士/中国香港作为留学地区？", options:["非常符合","比较符合","一般","不太符合","完全不符合"]}
+        ];
+
+        // 职业数据库
+        const careerData = {
+            "动手实践_AP物理1/2/C_美国": {
+                name: "机械工程师",
+                desc: "设计、开发、测试机械系统和设备，广泛应用于制造业、科技企业等领域",
+                major: "机械工程、智能制造、工程学、材料工程",
+                courses: "AP物理C、AP微积分BC、AP化学、工程制图、实验科学",
+                schools: "麻省理工学院、斯坦福大学、加州理工学院、佐治亚理工学院"
+            },
+            "逻辑思考_AP微积分AB/BC_美国": {
+                name: "数据科学家",
+                desc: "通过数据分析和算法模型解决商业问题，是目前全球最热门的高薪职业之一",
+                major: "数据科学、计算机科学、统计学、应用数学",
+                courses: "AP微积分BC、AP计算机科学A、AP统计学、AP物理C",
+                schools: "卡内基梅隆大学、斯坦福大学、麻省理工学院、加州大学伯克利分校"
+            },
+            "商科分析_AP经济学（宏观/微观）_美国": {
+                name: "商业分析师",
+                desc: "分析企业运营数据，提供商业决策建议，就业面广且发展空间大",
+                major: "商业分析、工商管理、市场营销、运营管理",
+                courses: "AP经济学（宏观+微观）、AP微积分AB、AP统计学、AP计算机科学原理",
+                schools: "纽约大学、宾夕法尼亚大学沃顿商学院、芝加哥大学、密歇根大学安娜堡分校"
+            },
+            "金融管理_AP经济学（宏观/微观）_瑞士": {
+                name: "金融分析师",
+                desc: "瑞士是全球金融中心，金融分析师主要从事投资分析、风险管理、资产配置等工作",
+                major: "金融学、金融工程、投资管理、风险管理",
+                courses: "AP经济学（宏观+微观）、AP微积分BC、AP统计学、AP计算机科学A",
+                schools: "圣加仑大学、苏黎世联邦理工学院、洛桑高等商学院、日内瓦大学"
+            },
+            "经济分析_AP统计学_荷兰": {
+                name: "经济分析师",
+                desc: "荷兰的经济学研究全球领先，经济分析师为政府/企业提供经济政策和市场分析",
+                major: "经济学、计量经济学、发展经济学、国际经济与贸易",
+                courses: "AP经济学（宏观+微观）、AP统计学、AP微积分BC、AP历史",
+                schools: "鹿特丹管理学院、阿姆斯特丹大学、蒂尔堡大学、格罗宁根大学"
+            },
+            "金融管理_AP微积分AB/BC_英国": {
+                name: "投资银行家",
+                desc: "英国伦敦是全球金融中心，投资银行家主要从事企业融资、并购、资本市场业务",
+                major: "金融学、投资银行学、公司金融、金融市场",
+                courses: "AP微积分BC、AP经济学（宏观/微观）、AP统计学、AP英语语言与写作",
+                schools: "伦敦政治经济学院、牛津大学、剑桥大学、华威大学"
+            },
+            "商科分析_AP统计学_中国香港": {
+                name: "跨境电商运营专家",
+                desc: "依托香港的国际商贸优势，负责跨境电商平台的运营、市场分析和策略制定",
+                major: "国际商务、电子商务、市场营销、供应链管理",
+                courses: "AP经济学（微观）、AP统计学、AP计算机科学原理、AP心理学",
+                schools: "香港大学、香港中文大学、香港科技大学、香港城市大学"
+            },
+            "物理工程_AP物理1/2/C_瑞士": {
+                name: "精密仪器工程师",
+                desc: "瑞士的精密制造全球领先，专注于高端仪器、钟表、医疗设备等精密机械研发",
+                major: "精密工程、机械工程、材料科学、仪器科学",
+                courses: "AP物理C、AP微积分BC、AP化学、AP计算机科学A",
+                schools: "苏黎世联邦理工学院、洛桑联邦理工学院、伯尔尼大学、纳沙泰尔大学"
+            },
+            "物理工程_AP化学_德国": {
+                name: "化工工程师",
+                desc: "德国化工产业全球顶尖，化工工程师从事化工工艺设计、产品研发、生产管理",
+                major: "化学工程、材料工程、生物化工、环境工程",
+                courses: "AP化学、AP物理C、AP微积分BC、AP环境科学",
+                schools: "慕尼黑工业大学、亚琛工业大学、卡尔斯鲁厄理工学院、柏林工业大学"
+            },
+            "艺术设计_AP艺术史_美国": {
+                name: "视觉艺术设计师",
+                desc: "从事平面设计、品牌设计、数字媒体设计等工作，是创意产业核心职业",
+                major: "视觉传达设计、平面设计、数字媒体艺术、纯艺术",
+                courses: "AP艺术史、AP艺术与设计、AP英语语言与写作、AP历史",
+                schools: "罗德岛设计学院、帕森斯设计学院、纽约视觉艺术学院、加州艺术学院"
+            },
+            "艺术设计_AP英语语言与写作_英国": {
+                name: "时尚设计师",
+                desc: "英国时尚产业全球领先，时尚设计师负责服装、配饰等时尚产品的设计与开发",
+                major: "时尚设计、服装设计、纺织品设计、时尚管理",
+                courses: "AP艺术史、AP艺术与设计、AP英语语言与写作、AP心理学",
+                schools: "中央圣马丁艺术与设计学院、伦敦时装学院、皇家艺术学院、切尔西艺术学院"
+            },
+            "生命科学_AP生物_新加坡": {
+                name: "生物医药研究员",
+                desc: "新加坡生物医药产业发达，研究员从事药物研发、生物科技、临床实验等工作",
+                major: "生物医学、分子生物学、药学、生物工程",
+                courses: "AP生物、AP化学、AP微积分AB、AP环境科学",
+                schools: "新加坡国立大学、南洋理工大学、新加坡管理大学、新加坡科技设计大学"
+            },
+            "人文社科_AP心理学_加拿大": {
+                name: "人力资源管理师",
+                desc: "加拿大重视人力资源管理，HR管理师负责企业人才招聘、培训、薪酬福利管理",
+                major: "人力资源管理、心理学、组织行为学、劳动经济学",
+                courses: "AP心理学、AP经济学（微观）、AP历史、AP英语语言与写作",
+                schools: "多伦多大学、英属哥伦比亚大学、西安大略大学、麦吉尔大学"
+            },
+            "default": [
+                {
+                    name: "金融科技分析师",
+                    desc: "结合金融与科技的复合型职业，负责金融产品数字化、区块链应用、风控系统搭建",
+                    major: "金融科技、计算机科学、金融学、数据科学",
+                    courses: "AP微积分BC、AP计算机科学A、AP经济学（宏观/微观）、AP统计学",
+                    schools: "纽约大学、卡内基梅隆大学、新加坡国立大学、香港科技大学"
+                },
+                {
+                    name: "工业设计师",
+                    desc: "结合艺术与工程的复合型职业，负责产品外观与功能的一体化设计",
+                    major: "工业设计、产品设计、交互设计、工程设计",
+                    courses: "AP艺术与设计、AP物理1、AP微积分AB、AP计算机科学原理",
+                    schools: "罗德岛设计学院、卡内基梅隆大学、米兰理工大学、代尔夫特理工大学"
+                },
+                {
+                    name: "国际艺术策展人",
+                    desc: "负责艺术展览策划、艺术品收藏与管理，是艺术与商业结合的高端职业",
+                    major: "艺术管理、策展研究、艺术史、文化产业管理",
+                    courses: "AP艺术史、AP英语语言与写作、AP历史、AP心理学",
+                    schools: "纽约大学、伦敦艺术大学、巴黎索邦大学、阿姆斯特丹大学"
+                }
+            ]
+        };
+
+        // ========== 新增：薪资与ROI数据库 ==========
+        const salaryROIData = {
+            // 职业薪资数据（2025年最新）
+            "机械工程师": {
+                entrySalary: 45,    // 入门年薪（万元）
+                midSalary: 80,      // 5年经验年薪（万元）
+                seniorSalary: 150,  // 10年经验年薪（万元）
+                domesticSalary: 25, // 国内同水平年薪（万元）
+                growthRate: 8       // 年薪增长率（%）
+            },
+            "数据科学家": {
+                entrySalary: 60,
+                midSalary: 120,
+                seniorSalary: 200,
+                domesticSalary: 35,
+                growthRate: 12
+            },
+            "商业分析师": {
+                entrySalary: 40,
+                midSalary: 75,
+                seniorSalary: 130,
+                domesticSalary: 22,
+                growthRate: 9
+            },
+            "金融分析师": {
+                entrySalary: 55,
+                midSalary: 110,
+                seniorSalary: 180,
+                domesticSalary: 30,
+                growthRate: 10
+            },
+            "经济分析师": {
+                entrySalary: 38,
+                midSalary: 70,
+                seniorSalary: 120,
+                domesticSalary: 20,
+                growthRate: 7
+            },
+            "投资银行家": {
+                entrySalary: 80,
+                midSalary: 180,
+                seniorSalary: 300,
+                domesticSalary: 50,
+                growthRate: 15
+            },
+            "跨境电商运营专家": {
+                entrySalary: 35,
+                midSalary: 65,
+                seniorSalary: 100,
+                domesticSalary: 18,
+                growthRate: 8
+            },
+            "精密仪器工程师": {
+                entrySalary: 50,
+                midSalary: 90,
+                seniorSalary: 160,
+                domesticSalary: 28,
+                growthRate: 9
+            },
+            "化工工程师": {
+                entrySalary: 42,
+                midSalary: 78,
+                seniorSalary: 140,
+                domesticSalary: 24,
+                growthRate: 7
+            },
+            "视觉艺术设计师": {
+                entrySalary: 30,
+                midSalary: 55,
+                seniorSalary: 90,
+                domesticSalary: 15,
+                growthRate: 6
+            },
+            "时尚设计师": {
+                entrySalary: 28,
+                midSalary: 50,
+                seniorSalary: 85,
+                domesticSalary: 14,
+                growthRate: 5
+            },
+            "生物医药研究员": {
+                entrySalary: 40,
+                midSalary: 75,
+                seniorSalary: 130,
+                domesticSalary: 22,
+                growthRate: 8
+            },
+            "人力资源管理师": {
+                entrySalary: 32,
+                midSalary: 60,
+                seniorSalary: 95,
+                domesticSalary: 18,
+                growthRate: 6
+            },
+            "金融科技分析师": {
+                entrySalary: 65,
+                midSalary: 130,
+                seniorSalary: 220,
+                domesticSalary: 38,
+                growthRate: 13
+            },
+            "工业设计师": {
+                entrySalary: 35,
+                midSalary: 68,
+                seniorSalary: 110,
+                domesticSalary: 19,
+                growthRate: 7
+            },
+            "国际艺术策展人": {
+                entrySalary: 30,
+                midSalary: 58,
+                seniorSalary: 95,
+                domesticSalary: 16,
+                growthRate: 6
+            }
+        };
+
+        // 各国留学成本基准（万元/年）
+        const countryCostBase = {
+            "美国": 50,
+            "英国": 45,
+            "加拿大": 30,
+            "澳大利亚": 35,
+            "荷兰": 25,
+            "瑞士": 40,
+            "中国香港": 20,
+            "新加坡": 30
+        };
+
+        // AI知识库
+        const aiKnowledgeBase = {
+            "AP微积分": "AP微积分备考建议：1. 掌握核心知识点（极限、导数、积分、级数）；2. 刷历年真题（至少近5年）；3. 重点练习FRQ大题，注意解题步骤；4. 推荐教材：Barron's AP Calculus BC；5. 5分率约40%，BC比AB多级数内容，建议直接考BC。",
+            "AP物理": "AP物理备考建议：1. 物理1/2侧重代数基础，物理C（力学+电磁学）需要微积分；2. 物理C 5分率约35%，是工程专业的核心科目；3. 重点掌握公式应用和实验分析；4. 推荐教材：College Board官方指南+普林斯顿AP物理C。",
+            "AP经济学": "AP经济学备考建议：1. 宏观+微观建议一起考，知识点互补；2. 重点记忆图形（供需曲线、菲利普斯曲线等）；3. FRQ常考政策分析，要结合实例；4. 5分率约15-20%，偏文科但需要逻辑分析。",
+            "AP艺术史": "AP艺术史备考建议：1. 掌握250幅核心作品，涵盖不同时期/地区；2. 学会分析作品的形式、内容、语境；3. 写作部分要结合艺术术语；4. 推荐资源：Khan Academy艺术史课程+Crash Course。",
+            "美国留学费用": "美国本科留学费用：1. 私立大学：学费$40,000-$60,000/年，公立大学（州外）$25,000-$40,000/年；2. 生活费：大城市$15,000-$25,000/年，小城市$10,000-$15,000/年；3. 艺术院校费用更高，罗德岛设计学院约$70,000/年；4. 奖学金：国际生可申请Merit-based奖学金。",
+            "英国留学费用": "英国本科留学费用：1. 学费：商科/理工科£20,000-£30,000/年，艺术设计£18,000-£25,000/年；2. 生活费：伦敦£12,000-£15,000/年，非伦敦£8,000-£10,000/年；3. 学制3年，总费用比美国低；4. 艺术院校：中央圣马丁约£22,000/年学费。",
+            "荷兰留学费用": "荷兰本科留学费用：1. 欧盟外学生€8,000-€20,000/年；2. 生活费：鹿特丹/阿姆斯特丹€10,000-€12,000/年；3. 鹿特丹管理学院学费约€18,000/年；4. 部分院校提供奖学金，如橙色郁金香奖学金。",
+            "瑞士留学费用": "瑞士留学费用：1. 公立大学学费低（€1,000-€2,000/学期），但生活费高；2. 私立商学院：圣加仑大学约CHF 25,000/年；3. 生活费：苏黎世CHF 1,800-2,500/月；4. 非欧盟学生可打工（每周15小时）。",
+            "艺术作品集": "艺术院校作品集要求：1. 美国（罗德岛/帕森斯）：15-20件作品，展现创意过程和多样性；2. 英国（中央圣马丁）：注重概念和调研过程，而非成品；3. 建议包含：素描、色彩、设计项目、实验性作品；4. 提交格式：电子版（PDF/网站）+ 创作说明。",
+            "文书写作": "留学文书写作技巧：1. 个人陈述（PS）突出个人特色和专业热情；2. 文书要结合具体经历，避免空泛；3. 商科文书突出领导力和解决问题能力；4. 艺术文书解释创作理念和职业规划；5. 建议至少修改3-5稿，找native speaker润色。",
+            "标化考试": "国际部标化考试规划：1. SAT/ACT：建议11-12年级考，目标1450+/33+；2. TOEFL/IELTS：TOEFL 100+/IELTS 7+；3. AP：建议考3-5门，商科选经济/统计/微积分，艺术选艺术史/英语；4. 备考时间：提前1年准备，分阶段突破。",
+            "金融就业前景": "金融专业就业前景：1. 就业方向：投行、基金、券商、风控、财务分析；2. 美国：起薪$60,000-$80,000/年，投行分析师$100,000+；3. 瑞士：金融行业薪资高，就业稳定性强；4. 核心能力：数据分析、金融建模、沟通能力；5. 证书：CFA/FRM提升竞争力。",
+            "艺术就业前景": "艺术设计就业前景：1. 就业方向：设计师、策展人、艺术管理、文创产业；2. 美国：平面设计师起薪$45,000-$60,000/年，资深设计师$80,000+；3. 英国：创意产业发达，伦敦就业机会多；4. 建议：艺术+商业/科技结合，提升就业竞争力。",
+            "工程就业前景": "工程专业就业前景：1. 机械工程：制造业、汽车、航空航天，美国起薪$70,000+/年；2. 化工工程：德国就业优势大，起薪€45,000+/年；3. 瑞士精密工程：全球稀缺人才，薪资领先；4. 核心能力：实践经验+项目经历。",
+            "GPA提升": "国际部GPA提升技巧：1. 重点科目（AP/荣誉课）优先，权重更高；2. 及时和老师沟通，了解评分标准；3. 建立错题本，定期复习；4. 平衡选课难度，不要一味选难课导致GPA下降；5. 利用课后辅导和学习小组。",
+            "时间管理": "国际部时间管理方法：1. 制定周计划，分配标化/AP/活动时间；2. 番茄工作法：25分钟专注+5分钟休息；3. 优先完成重要且紧急的任务（如截止日期）；4. 留足弹性时间，避免过度安排；5. 每周复盘，调整计划。",
+            "美国生活": "美国留学生活贴士：1. 住宿：大一建议住校，熟悉环境；2. 交通：大城市靠公共交通，小城市需要买车；3. 饮食：自己做饭省钱且健康；4. 社交：参加社团活动，拓展人脉；5. 安全：注意校园周边安全，购买保险。",
+            "英国生活": "英国留学生活贴士：1. 住宿：学校宿舍/私人公寓，伦敦租房贵；2. 交通：Oyster卡坐地铁，火车提前订票便宜；3. 气候：多雨，准备防水衣物；4. 文化：尊重当地习惯，融入但保持自我；5. 打工：每周允许20小时，假期全职。",
+            "商科": "商科方向推荐AP科目组合：微观经济学+宏观经济学+微积分BC+统计学+计算机科学原理。推荐院校：纽约大学、宾夕法尼亚大学沃顿商学院、鹿特丹管理学院、圣加仑大学。",
+            "金融": "金融专业推荐AP科目组合：微积分BC+统计学+微观经济学+宏观经济学+计算机科学A。推荐院校：宾夕法尼亚大学、纽约大学、圣加仑大学、伦敦政治经济学院。",
+            "经济分析": "经济分析方向推荐AP科目组合：微观经济学+宏观经济学+统计学+微积分BC+历史。推荐院校：鹿特丹管理学院、阿姆斯特丹大学、芝加哥大学、伦敦政治经济学院。",
+            "物理工程": "物理工程方向推荐AP科目组合：物理C（力学+电磁学）+微积分BC+化学+计算机科学A。推荐院校：麻省理工学院、斯坦福大学、苏黎世联邦理工学院、慕尼黑工业大学。",
+            "艺术": "艺术专业推荐AP科目组合：艺术史+艺术与设计+英语语言与写作+历史/心理学。推荐院校：罗德岛设计学院、帕森斯设计学院、中央圣马丁艺术与设计学院、伦敦艺术大学。",
+            "艺术设计": "艺术专业推荐AP科目组合：艺术史+艺术与设计+英语语言与写作+历史/心理学。推荐院校：罗德岛设计学院、帕森斯设计学院、中央圣马丁艺术与设计学院、伦敦艺术大学。",
+            "荷兰": "荷兰的高等教育以应用型为主，商科（鹿特丹伊拉斯姆斯大学）、经济学（阿姆斯特丹大学）、水利工程（代尔夫特理工）是优势专业。AP推荐：经济学、统计学、微积分BC。",
+            "瑞士": "瑞士的理工科（ETH苏黎世）、酒店管理（洛桑酒店管理学院）、金融（圣加仑大学）全球顶尖。AP推荐：物理C、微积分BC、经济学、统计学。",
+            "香港": "中国香港的商科（港大/港中文）、计算机（港科技）、法学是王牌专业。AP推荐：经济学、微积分BC、统计学、英语语言与写作。",
+            "你好": "你好😊！我是你的留学职业AI顾问，有任何关于国际部学习、留学规划、职业选择的问题都可以问我，比如AP备考、留学费用、院校申请、职业发展、薪资回报率等。",
+            "谢谢": "不客气😜！如果还有其他问题想了解，比如AP微积分备考技巧、荷兰留学费用、艺术作品集要求、各专业ROI计算等，随时都可以问我。",
+            "再见": "再见👋！希望我的解答对你有帮助，祝你留学申请顺利，学业有成！如果之后还有问题，欢迎再来找我。",
+            "国际部怎么规划": "国际部整体规划建议：1. 9-10年级：打好GPA基础，开始托福/SAT备考，探索兴趣；2. 11年级：集中考AP（3-5门），标化出分，做核心活动；3. 12年级：申请院校，完成文书，补申/等录取；4. 核心原则：GPA>标化>AP>活动，平衡发展。",
+            // 新增ROI相关问答
+            "ROI计算": "ROI（投资回报率）计算公式：(毕业后年均薪资 × 工作年限 - 总留学成本) ÷ 总留学成本 × 100%。回本周期 = 总留学成本 ÷ (毕业后年均薪资 - 国内同水平薪资)。例如：美国金融专业总花费200万，毕业年薪80万，国内同水平50万，回本周期=200/(80-50)=6.7年。",
+            "金融ROI": "金融专业ROI分析：1. 美国金融本科总花费约200万，毕业起薪80万/年，5年ROI约100%，回本周期约6-7年；2. 瑞士金融本科总花费160万，毕业起薪55万/年，5年ROI约70%，回本周期约8年；3. 整体属于高ROI专业。",
+            "工程ROI": "工程专业ROI分析：1. 美国机械工程本科总花费200万，毕业起薪45万/年，5年ROI约12.5%，回本周期约10年；2. 德国化工工程成本低（总花费80万），毕业起薪42万/年，5年ROI约162.5%，回本周期约4年；3. 欧洲工程专业ROI更高。",
+            "艺术ROI": "艺术专业ROI分析：1. 美国艺术设计本科总花费200万，毕业起薪30万/年，5年ROI约-25%，回本周期约13年；2. 英国艺术设计总花费135万，毕业起薪28万/年，5年ROI约4.4%，回本周期约11年；3. 艺术专业ROI偏低，适合兴趣导向选择。",
+            "default": "你问的问题我正在学习中😝！不过我可以解答这些方向的问题：\n1. AP备考：微积分/物理/经济学/艺术史等\n2. 留学规划：费用/申请/文书/作品集\n3. 职业发展：商科/艺术/工程就业前景/薪资ROI\n4. 学习方法：GPA提升/时间管理/标化备考\n5. 院校推荐：各国顶尖商科/艺术/工程院校\n你可以问得更具体一些，比如“AP微积分怎么备考？”或“金融专业ROI是多少？”"
+        };
+
+        // 全局变量
+        let currentPage = 0;
+        const questionsPerPage = 2;
+        let totalPages = Math.ceil(questions.length / questionsPerPage);
+        let userAnswers = {};
+        let userProfile = {interest:"", subject:"", country:"", subjects:[]};
+        let recommendedCareers = []; // 存储推荐的职业列表
+
+        // DOM元素
+        const welcomeSection = document.getElementById('welcome-section');
+        const quizSection = document.getElementById('quiz-section');
+        const resultSection = document.getElementById('result-section');
+        const roiSection = document.getElementById('roi-section'); // 新增ROI页面
+        const quizContainer = document.getElementById('quiz-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const startBtn = document.getElementById('start-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultContainer = document.getElementById('result-container');
+        const resetBtn = document.getElementById('reset-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const aiChatContainer = document.getElementById('ai-chat-container');
+        const aiQuestionInput = document.getElementById('ai-question-input');
+        const aiSendBtn = document.getElementById('ai-send-btn');
+        const apCheckboxes = document.querySelectorAll('.ap-checkbox');
+        // 新增ROI相关元素
+        const viewRoiBtn = document.getElementById('view-roi-btn');
+        const backToResultBtn = document.getElementById('back-to-result-btn');
+        const calcRoiBtn = document.getElementById('calc-roi-btn');
+        const exportRoiBtn = document.getElementById('export-roi-btn');
+        const roiResultContainer = document.getElementById('roi-result-container');
+
+        // 初始化事件绑定
+        startBtn.addEventListener('click', startQuiz);
+        prevBtn.addEventListener('click', goPrevPage);
+        nextBtn.addEventListener('click', goNextPage);
+        submitBtn.addEventListener('click', submitQuiz);
+        resetBtn.addEventListener('click', resetAndGenerate);
+        restartBtn.addEventListener('click', restartQuiz);
+        aiSendBtn.addEventListener('click', sendAiQuestion);
+        aiQuestionInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendAiQuestion();
+        });
+        // 新增ROI事件绑定
+        viewRoiBtn.addEventListener('click', showROISection);
+        backToResultBtn.addEventListener('click', backToResultSection);
+        calcRoiBtn.addEventListener('click', calculateROI);
+        exportRoiBtn.addEventListener('click', exportROIReport);
+
+        // 开始测评
+        function startQuiz() {
+            welcomeSection.classList.add('hidden');
+            quizSection.classList.remove('hidden');
+            renderQuizPage();
+            updateProgress();
+        }
+
+        // 渲染当前页题目
+        function renderQuizPage() {
+            const start = currentPage * questionsPerPage;
+            const end = Math.min(start + questionsPerPage, questions.length);
+            const currentQuestions = questions.slice(start, end);
+            
+            quizContainer.innerHTML = '';
+            
+            currentQuestions.forEach(q => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'mb-8';
+                questionDiv.innerHTML = `
+                    <div class="mb-3">
+                        <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-2">
+                            ${getTypeLabel(q.type)}
+                        </span>
+                        <h3 class="text-lg font-semibold">${q.id}. ${q.text}</h3>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2" id="options-${q.id}">
+                        ${q.options.map((opt, idx) => `
+                            <div class="option-item">
+                                <input type="radio" name="q-${q.id}" id="q-${q.id}-opt-${idx}" value="${opt}" class="hidden">
+                                <label for="q-${q.id}-opt-${idx}" class="block p-2 border border-gray-300 rounded-lg text-center cursor-pointer transition-all hover:border-primary hover:bg-primary/5">
+                                    ${opt}
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                quizContainer.appendChild(questionDiv);
+            });
+            
+            // 加载已保存的答案
+            Object.keys(userAnswers).forEach(qId => {
+                const answer = userAnswers[qId];
+                const radio = document.querySelector(`input[name="q-${qId}"][value="${answer}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    radio.parentElement.querySelector('label').classList.add('bg-primary/10', 'border-primary', 'text-primary');
+                }
+            });
+            
+            // 绑定选项点击事件
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const qId = this.name.split('-')[1];
+                    userAnswers[qId] = this.value;
+                    
+                    document.querySelectorAll(`input[name="q-${qId}"]`).forEach(r => {
+                        const label = r.parentElement.querySelector('label');
+                        label.classList.remove('bg-primary/10', 'border-primary', 'text-primary');
+                    });
+                    this.parentElement.querySelector('label').classList.add('bg-primary/10', 'border-primary', 'text-primary');
+                });
+            });
+            
+            prevBtn.classList.toggle('hidden', currentPage === 0);
+            nextBtn.classList.toggle('hidden', currentPage === totalPages - 1);
+            submitBtn.classList.toggle('hidden', currentPage !== totalPages - 1);
+        }
+
+        // 上一页
+        function goPrevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                renderQuizPage();
+                updateProgress();
+            }
+        }
+
+        // 下一页
+        function goNextPage() {
+            const start = currentPage * questionsPerPage;
+            const end = Math.min(start + questionsPerPage, questions.length);
+            const currentQuestionIds = questions.slice(start, end).map(q => q.id.toString());
+            const allAnswered = currentQuestionIds.every(id => userAnswers[id]);
+            
+            if (!allAnswered) {
+                alert('请完成当前页所有题目后继续');
+                return;
+            }
+            
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                renderQuizPage();
+                updateProgress();
+            }
+        }
+
+        // 提交测评
+        function submitQuiz() {
+            const allAnswered = Object.keys(userAnswers).length === questions.length;
+            if (!allAnswered) {
+                alert('请完成所有题目后提交');
+                return;
+            }
+            
+            analyzeResults();
+            showResults();
+        }
+
+        // 分析答案生成用户画像
+        function analyzeResults() {
+            const interestScores = {
+                "动手实践": 0,
+                "逻辑思考": 0,
+                "创意设计": 0,
+                "人际沟通": 0,
+                "商科分析": 0,
+                "金融管理": 0,
+                "经济分析": 0,
+                "物理工程": 0,
+                "生命科学": 0,
+                "人文社科": 0,
+                "艺术设计": 0
+            };
+            
+            const subjectScores = {
+                "AP微积分AB/BC": 0,
+                "AP物理1/2/C": 0,
+                "AP化学": 0,
+                "AP生物": 0,
+                "AP经济学（宏观/微观）": 0,
+                "AP统计学": 0,
+                "AP计算机科学A/原理": 0,
+                "AP心理学": 0,
+                "AP历史（美国/世界/欧洲）": 0,
+                "AP英语语言与写作": 0,
+                "AP艺术史": 0,
+                "AP环境科学": 0,
+                "AP艺术与设计": 0
+            };
+            
+            const countryScores = {
+                "美国": 0,
+                "英国": 0,
+                "加拿大": 0,
+                "澳大利亚": 0,
+                "荷兰": 0,
+                "瑞士": 0,
+                "中国香港": 0,
+                "新加坡": 0,
+                "日本": 0,
+                "德国": 0
+            };
+            
+            // 计算得分
+            questions.forEach(q => {
+                const answer = userAnswers[q.id];
+                if (!answer) return;
+                
+                const score = ["完全不符合", "不太符合", "一般", "比较符合", "非常符合"].indexOf(answer) + 1;
+                
+                if (q.type === 'interest') {
+                    if (q.id >=1 && q.id <=8) {
+                        const idx = (q.id - 1) % 4;
+                        const baseInterestKeys = ["动手实践", "逻辑思考", "创意设计", "人际沟通"];
+                        interestScores[baseInterestKeys[idx]] += score;
+                    }
+                    else if (q.id ===9) interestScores["商科分析"] += score;
+                    else if (q.id ===10) interestScores["金融管理"] += score;
+                    else if (q.id ===11) interestScores["经济分析"] += score;
+                    else if (q.id ===12) interestScores["物理工程"] += score;
+                    else if (q.id ===13) interestScores["金融管理"] += score;
+                    else if (q.id ===14) interestScores["经济分析"] += score;
+                    else if (q.id ===15) interestScores["金融管理"] += score;
+                    else if (q.id ===16) interestScores["物理工程"] += score;
+                    else if (q.id ===17) interestScores["商科分析"] += score;
+                    else if (q.id ===18) interestScores["商科分析"] += score;
+                    else if (q.id ===19) interestScores["物理工程"] += score;
+                    else if (q.id ===20) interestScores["商科分析"] += score;
+                    else if (q.id >=21 && q.id <=24) interestScores["艺术设计"] += score;
+                } 
+                else if (q.type === 'subject') {
+                    const subjectKeys = Object.keys(subjectScores);
+                    const idx = q.id - 25;
+                    if (idx >=0 && idx < subjectKeys.length) {
+                        subjectScores[subjectKeys[idx]] += score;
+                    }
+                } 
+                else if (q.type === 'country') {
+                    if (q.id === 37) countryScores["美国"] += score;
+                    else if (q.id === 38) countryScores["英国"] += score;
+                    else if (q.id === 39) {
+                        countryScores["加拿大"] += score;
+                        countryScores["澳大利亚"] += score;
+                    } else if (q.id === 40) {
+                        countryScores["荷兰"] += score;
+                        countryScores["瑞士"] += score;
+                        countryScores["中国香港"] += score;
+                    }
+                }
+            });
+            
+            userProfile.interest = Object.keys(interestScores).reduce((a, b) => interestScores[a] > interestScores[b] ? a : b);
+            userProfile.subject = Object.keys(subjectScores).reduce((a, b) => subjectScores[a] > subjectScores[b] ? a : b);
+            userProfile.country = Object.keys(countryScores).reduce((a, b) => countryScores[a] > countryScores[b] ? a : b);
+            userProfile.subjects = Object.entries(subjectScores)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 3)
+                .map(([key]) => key);
+        }
+
+        // 显示结果
+        function showResults() {
+            quizSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+            
+            const key = `${userProfile.interest}_${userProfile.subject}_${userProfile.country}`;
+            recommendedCareers = []; // 重置推荐职业列表
+            
+            if (careerData[key]) {
+                recommendedCareers.push(careerData[key]);
+            }
+            
+            const defaultCareers = careerData.default;
+            for (let i = 0; i < defaultCareers.length && recommendedCareers.length < 3; i++) {
+                recommendedCareers.push(defaultCareers[i]);
+            }
+            
+            // 渲染结果
+            resultContainer.innerHTML = recommendedCareers.map((career, index) => `
+                <div class="bg-white rounded-xl p-5 border border-gray-200 card-shadow hover:border-primary transition-all">
+                    <div class="text-primary text-2xl mb-3"><i class="fa fa-briefcase"></i></div>
+                    <h3 class="text-xl font-bold text-primary mb-2">${career.name}</h3>
+                    <p class="text-gray-600 mb-3 text-sm">${career.desc}</p>
+                    <div class="mb-2">
+                        <span class="text-xs font-semibold text-gray-500">推荐专业：</span>
+                        <span class="text-sm">${career.major}</span>
+                    </div>
+                    <div class="mb-2">
+                        <span class="text-xs font-semibold text-gray-500">AP选课建议：</span>
+                        <span class="text-sm">${career.courses}</span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold text-gray-500">推荐院校：</span>
+                        <span class="text-sm">${career.schools}</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 初始化ROI计算的国家选择
+            document.getElementById('roi-country').value = userProfile.country || "美国";
+        }
+
+        // 重新生成结果
+        function resetAndGenerate() {
+            const newInterest = document.getElementById('reset-interest').value;
+            const newCountry = document.getElementById('reset-country').value;
+            
+            const selectedSubjects = Array.from(document.querySelectorAll('.ap-checkbox:checked'))
+                .map(cb => cb.value);
+            
+            if (newInterest) userProfile.interest = newInterest;
+            if (newCountry) userProfile.country = newCountry;
+            if (selectedSubjects.length > 0) {
+                userProfile.subject = selectedSubjects[0];
+                userProfile.subjects = selectedSubjects;
+            }
+            
+            showResults();
+            alert('已根据你的选择重新生成职业推荐！');
+        }
+
+        // 重新测评
+        function restartQuiz() {
+            currentPage = 0;
+            userAnswers = {};
+            userProfile = {interest:"", subject:"", country:"", subjects:[]};
+            recommendedCareers = [];
+            document.querySelectorAll('.ap-checkbox').forEach(cb => cb.checked = false);
+            resultSection.classList.add('hidden');
+            roiSection.classList.add('hidden'); // 隐藏ROI页面
+            welcomeSection.classList.remove('hidden');
+            updateProgress();
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const answered = Object.keys(userAnswers).length;
+            const percent = (answered / questions.length) * 100;
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `进度: ${answered}/${questions.length}题`;
+        }
+
+        // 获取题目类型标签
+        function getTypeLabel(type) {
+            switch(type) {
+                case 'interest': return '兴趣方向';
+                case 'subject': return 'AP考试科目';
+                case 'country': return '留学意向';
+                default: return '测评题';
+            }
+        }
+
+        // AI对话逻辑
+        function sendAiQuestion() {
+            const question = aiQuestionInput.value.trim();
+            if (!question) return;
+            
+            aiQuestionInput.value = '';
+            
+            // 添加用户消息
+            const userMsg = document.createElement('div');
+            userMsg.className = 'flex items-start justify-end';
+            userMsg.innerHTML = `
+                <div class="bg-primary/10 rounded-lg p-3 max-w-[80%]">
+                    <p class="text-sm">${question}</p>
+                </div>
+                <div class="bg-primary rounded-full w-8 h-8 flex items-center justify-center text-white ml-2">
+                    <i class="fa fa-user"></i>
+                </div>
+            `;
+            aiChatContainer.appendChild(userMsg);
+            
+            setTimeout(() => {
+                let response = aiKnowledgeBase.default;
+                const lowerQuestion = question.toLowerCase();
+                
+                const keywords = [
+                    ["AP微积分", "微积分"],
+                    ["AP物理", "物理"],
+                    ["AP经济学", "经济学"],
+                    ["AP艺术史", "艺术史"],
+                    ["美国留学费用", "美国费用", "美国留学多少钱"],
+                    ["英国留学费用", "英国费用", "英国留学多少钱"],
+                    ["荷兰留学费用", "荷兰费用", "荷兰留学多少钱"],
+                    ["瑞士留学费用", "瑞士费用", "瑞士留学多少钱"],
+                    ["艺术作品集", "作品集", "艺术申请作品"],
+                    ["文书写作", "文书", "个人陈述", "PS"],
+                    ["标化考试", "SAT", "TOEFL", "IELTS"],
+                    ["金融就业前景", "金融就业", "金融前景"],
+                    ["艺术就业前景", "艺术就业", "艺术前景"],
+                    ["工程就业前景", "工程就业", "工程前景"],
+                    ["GPA提升", "GPA", "成绩提升"],
+                    ["时间管理", "规划时间", "安排学习"],
+                    ["美国生活", "美国留学生活"],
+                    ["英国生活", "英国留学生活"],
+                    ["商科", "商业"],
+                    ["金融", "投资"],
+                    ["经济分析", "经济学"],
+                    ["物理工程", "工程"],
+                    ["艺术", "艺术设计"],
+                    ["荷兰", "鹿特丹"],
+                    ["瑞士", "苏黎世"],
+                    ["香港", "中国香港"],
+                    ["你好", "您好", "嗨"],
+                    ["谢谢", "感谢"],
+                    ["再见", "拜拜"],
+                    ["国际部怎么规划", "国际部规划", "高中规划"],
+                    ["ROI计算", "投资回报率", "薪资回报"],
+                    ["金融ROI", "金融回报率"],
+                    ["工程ROI", "工程回报率"],
+                    ["艺术ROI", "艺术回报率"]
+                ];
+                
+                for (const [key, ...aliases] of keywords) {
+                    const allKeys = [key, ...aliases];
+                    if (allKeys.some(k => lowerQuestion.includes(k.toLowerCase()))) {
+                        response = aiKnowledgeBase[key] || aiKnowledgeBase.default;
+                        break;
+                    }
+                }
+                
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'flex items-start';
+                aiMsg.innerHTML = `
+                    <div class="bg-primary/10 rounded-full w-8 h-8 flex items-center justify-center text-primary mr-2">
+                        <i class="fa fa-robot"></i>
+                    </div>
+                    <div class="bg-neutral rounded-lg p-3 max-w-[80%]">
+                        <p class="text-sm">${response}</p>
+                    </div>
+                `;
+                aiChatContainer.appendChild(aiMsg);
+                aiChatContainer.scrollTop = aiChatContainer.scrollHeight;
+            }, 1000);
+            
+            aiChatContainer.scrollTop = aiChatContainer.scrollHeight;
+        }
+
+        // ========== 新增：ROI相关功能 ==========
+        
+        // 显示ROI页面
+        function showROISection() {
+            resultSection.classList.add('hidden');
+            roiSection.classList.remove('hidden');
+            calculateROI(); // 首次进入自动计算
+        }
+
+        // 返回结果页面
+        function backToResultSection() {
+            roiSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+        }
+
+        // 计算ROI
+        function calculateROI() {
+            const country = document.getElementById('roi-country').value;
+            const years = parseInt(document.getElementById('roi-years').value);
+            const budget = parseInt(document.getElementById('roi-budget').value);
+            
+            // 验证输入
+            if (isNaN(years) || years < 1 || years > 6) {
+                alert('请输入有效的学制年限（1-6年）');
+                return;
+            }
+            if (isNaN(budget) || budget < 10 || budget > 100) {
+                alert('请输入有效的年预算（10-100万元）');
+                return;
+            }
+            
+            // 计算总留学成本
+            const totalCost = years * budget;
+            
+            // 为每个推荐职业计算ROI
+            const roiResults = recommendedCareers.map(career => {
+                const salaryData = salaryROIData[career.name] || {
+                    entrySalary: 30,
+                    midSalary: 50,
+                    seniorSalary: 80,
+                    domesticSalary: 15,
+                    growthRate: 5
+                };
+                
+                // 计算5年ROI
+                const fiveYearIncome = salaryData.entrySalary * 5 + 
+                                      salaryData.entrySalary * salaryData.growthRate / 100 * (0+1+2+3+4);
+                const fiveYearROI = ((fiveYearIncome - totalCost) / totalCost * 100).toFixed(1);
+                
+                // 计算回本周期
+                const annualNetIncome = salaryData.entrySalary - salaryData.domesticSalary;
+                const paybackPeriod = annualNetIncome > 0 ? (totalCost / annualNetIncome).toFixed(1) : "∞";
+                
+                // 判定ROI等级
+                let roiLevel = "low";
+                if (parseFloat(fiveYearROI) >= 50) roiLevel = "high";
+                else if (parseFloat(fiveYearROI) >= 0) roiLevel = "medium";
+                
+                return {
+                    career: career,
+                    salaryData: salaryData,
+                    totalCost: totalCost,
+                    fiveYearROI: fiveYearROI,
+                    paybackPeriod: paybackPeriod,
+                    roiLevel: roiLevel
+                };
+            });
+            
+            // 渲染ROI结果
+            renderROIResults(roiResults);
+        }
+
+        // 渲染ROI结果
+        function renderROIResults(roiResults) {
+            roiResultContainer.innerHTML = roiResults.map((item, index) => {
+                const roiClass = `roi-${item.roiLevel}`;
+                const roiText = item.roiLevel === "high" ? "高回报率" : 
+                               (item.roiLevel === "medium" ? "中等回报率" : "低回报率");
+                
+                return `
+                    <div class="bg-white rounded-xl p-5 border ${roiClass} card-shadow transition-all">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold text-primary">${item.career.name}</h3>
+                            <span class="${roiClass} px-3 py-1 rounded-full text-sm font-medium">
+                                ${roiText}
+                            </span>
+                        </div>
+                        
+                        <!-- 薪资信息 -->
+                        <div class="mb-4">
+                            <h4 class="font-semibold text-gray-700 mb-2">薪资水平（人民币/年）</h4>
+                            <div class="space-y-1 text-sm">
+                                <div class="flex justify-between">
+                                    <span>入门薪资：</span>
+                                    <span class="font-medium">${item.salaryData.entrySalary} 万元</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>5年经验薪资：</span>
+                                    <span class="font-medium">${item.salaryData.midSalary} 万元</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>10年经验薪资：</span>
+                                    <span class="font-medium">${item.salaryData.seniorSalary} 万元</span>
+                                </div>
+                                <div class="flex justify-between text-gray-500">
+                                    <span>国内同水平薪资：</span>
+                                    <span>${item.salaryData.domesticSalary} 万元</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ROI计算结果 -->
+                        <div class="mb-4">
+                            <h4 class="font-semibold text-gray-700 mb-2">投资回报分析</h4>
+                            <div class="space-y-1 text-sm">
+                                <div class="flex justify-between">
+                                    <span>总留学成本：</span>
+                                    <span class="font-medium">${item.totalCost} 万元</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>5年投资回报率：</span>
+                                    <span class="font-medium ${roiClass}">${item.fiveYearROI}%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>回本周期：</span>
+                                    <span class="font-medium">${item.paybackPeriod} 年</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 建议 -->
+                        <div class="bg-neutral rounded-lg p-3 text-xs text-gray-600">
+                            <strong>建议：</strong>
+                            ${item.roiLevel === "high" 
+                                ? "该职业投资回报率高，留学性价比优秀，推荐优先选择。" 
+                                : (item.roiLevel === "medium" 
+                                    ? "该职业投资回报率中等，建议结合个人兴趣和职业规划综合考虑。" 
+                                    : "该职业投资回报率较低，更适合兴趣导向的选择，建议谨慎评估留学成本。")}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 导出ROI报告
+        function exportROIReport() {
+            // 生成报告内容
+            const country = document.getElementById('roi-country').value;
+            const years = document.getElementById('roi-years').value;
+            const budget = document.getElementById('roi-budget').value;
+            const totalCost = years * budget;
+            
+            let reportContent = `# 专业薪资回报率(ROI)分析报告
+生成时间：${new Date().toLocaleString()}
+留学国家/地区：${country}
+学制年限：${years}年
+年预算：${budget}万元
+总留学成本：${totalCost}万元
+
+## 职业薪资与ROI分析
+`;
+            
+            // 添加每个职业的分析
+            recommendedCareers.forEach((career, index) => {
+                const salaryData = salaryROIData[career.name] || {
+                    entrySalary: 30,
+                    midSalary: 50,
+                    seniorSalary: 80,
+                    domesticSalary: 15,
+                    growthRate: 5
+                };
+                
+                const fiveYearIncome = salaryData.entrySalary * 5 + 
+                                      salaryData.entrySalary * salaryData.growthRate / 100 * (0+1+2+3+4);
+                const fiveYearROI = ((fiveYearIncome - totalCost) / totalCost * 100).toFixed(1);
+                const annualNetIncome = salaryData.entrySalary - salaryData.domesticSalary;
+                const paybackPeriod = annualNetIncome > 0 ? (totalCost / annualNetIncome).toFixed(1) : "∞";
+                
+                reportContent += `### ${index+1}. ${career.name}
+- 推荐专业：${career.major}
+- 入门薪资：${salaryData.entrySalary}万元/年
+- 5年经验薪资：${salaryData.midSalary}万元/年
+- 10年经验薪资：${salaryData.seniorSalary}万元/年
+- 国内同水平薪资：${salaryData.domesticSalary}万元/年
+- 5年投资回报率：${fiveYearROI}%
+- 回本周期：${paybackPeriod}年
+
+`;
+            });
+            
+            // 创建下载链接
+            const blob = new Blob([reportContent], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `专业薪资ROI分析报告_${new Date().getTime()}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('ROI分析报告已导出！');
+        }
+    </script>
+</body>
+</html>
