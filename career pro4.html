@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国际部高中生职业测评</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body class="bg-[#F1F5F9] font-sans">
+    <div class="max-w-4xl mx-auto p-4">
+        <div class="bg-white rounded-xl shadow p-6 mb-6">
+            <h1 class="text-2xl font-bold text-[#0F4C81] text-center mb-2">国际部高中生职业选择测评</h1>
+            <p class="text-gray-500 text-center">7步完整流程：30题兴趣 → AP推荐 → 标化 → 专业 → 院校 → 职业 → 薪资ROI</p>
+        </div>
+
+        <!-- 步骤1：30题 -->
+        <div id="step1" class="block">
+            <div class="bg-white rounded-xl shadow p-6">
+                <div class="flex justify-between mb-4">
+                    <h2 class="text-xl font-bold text-[#0F4C81]">步骤1：兴趣测评（30题）</h2>
+                    <span id="qnum" class="text-gray-500">第1/30题</span>
+                </div>
+                <p id="question" class="text-lg mb-4"></p>
+                <div id="options" class="space-y-3"></div>
+                <div class="flex justify-between mt-6">
+                    <button id="prev" class="bg-gray-200 px-4 py-2 rounded disabled:opacity-50">上一题</button>
+                    <button id="next" class="bg-[#0F4C81] text-white px-4 py-2 rounded">下一题</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤2：AP推荐 -->
+        <div id="step2" class="hidden">
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold text-[#0F4C81] mb-4">步骤2：AP科目推荐（个性化）</h2>
+                <div id="apResult" class="grid grid-cols-2 gap-4 mb-6"></div>
+                <button onclick="goStep(3)" class="bg-[#0F4C81] text-white px-4 py-2 rounded">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤3：标化成绩 -->
+        <div id="step3" class="hidden">
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold text-[#0F4C81] mb-4">步骤3：标化成绩录入</h2>
+                <div class="space-y-3 mb-6">
+                    <input id="toefl" placeholder="托福分数（0-120）" class="w-full p-2 border rounded">
+                    <input id="ielts" placeholder="雅思分数（0-9）" class="w-full p-2 border rounded">
+                    <input id="sat" placeholder="SAT分数（400-1600）" class="w-full p-2 border rounded">
+                    <input id="act" placeholder="ACT分数（1-36）" class="w-full p-2 border rounded">
+                    <input id="apscores" placeholder="AP科目与分数（如：微积分BC 5）" class="w-full p-2 border rounded">
+                    <input id="comp" placeholder="竞赛奖项" class="w-full p-2 border rounded">
+                </div>
+                <button onclick="goStep(4)" class="bg-[#0F4C81] text-white px-4 py-2 rounded">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤4：专业推荐（动态） -->
+        <div id="step4" class="hidden">
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold text-[#0F4C81] mb-4">步骤4：推荐专业（按你的兴趣匹配）</h2>
+                <div id="majorResult" class="grid grid-cols-2 gap-3"></div>
+                <button onclick="goStep(5)" class="mt-6 bg-[#0F4C81] text-white px-4 py-2 rounded">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤5：院校推荐（动态） -->
+        <div id="step5" class="hidden">
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold text-[#0F4C81] mb-4">步骤5：推荐院校（按成绩+专业匹配）</h2>
+                <div id="schoolResult" class="space-y-3 mb-6"></div>
+                <button onclick="goStep(6)" class="bg-[#0F4C81] text-white px-4 py-2 rounded">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤6：职业推荐（动态） -->
+        <div id="step6" class="hidden">
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold text-[#0F4C81] mb-4">步骤6：推荐职业（根据你的专业）</h2>
+                <div id="careerResult" class="grid grid-cols-2 gap-3"></div>
+                <button onclick="goStep(7)" class="mt-6 bg-[#0F4C81] text-white px-4 py-2 rounded">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤7：薪资&ROI -->
+        <div id="step7" class="hidden">
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-xl font-bold text-[#0F4C81] mb-4">步骤7：薪资与投资回报率</h2>
+                <div id="salaryResult" class="space-y-2 mb-4"></div>
+                <div id="roiResult" class="p-4 bg-green-50 rounded mb-4"></div>
+                <button onclick="resetAll()" class="bg-[#0F4C81] text-white px-4 py-2 rounded">重新测评</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ==============================================
+    // 30道题 → 6大方向：理工/商科/艺术/生物/社科/数据
+    // ==============================================
+    const questions = [
+        {q:"你喜欢编程、软件开发？",type:"tech"},
+        {q:"你喜欢数据分析、统计？",type:"data"},
+        {q:"你喜欢生物、医学、生命科学？",type:"bio"},
+        {q:"你喜欢环保、气候、能源？",type:"env"},
+        {q:"你喜欢经济、商业、投资？",type:"bus"},
+        {q:"你喜欢管理、组织、带队？",type:"bus"},
+        {q:"你喜欢设计、美术、创作？",type:"art"},
+        {q:"你喜欢物理、机械、工程？",type:"tech"},
+        {q:"你喜欢海洋、生态、地理？",type:"env"},
+        {q:"你喜欢AI、人工智能？",type:"tech"},
+        {q:"你喜欢逻辑推理、解谜？",type:"data"},
+        {q:"你喜欢做实验、验证猜想？",type:"bio"},
+        {q:"你喜欢国际市场、贸易？",type:"bus"},
+        {q:"你喜欢理财、分析财报？",type:"bus"},
+        {q:"你喜欢创新、发明新产品？",type:"tech"},
+        {q:"你喜欢心理、行为分析？",type:"soc"},
+        {q:"你擅长沟通、说服别人？",type:"soc"},
+        {q:"你喜欢历史、社会研究？",type:"soc"},
+        {q:"你喜欢化学、材料？",type:"bio"},
+        {q:"你喜欢数学模型、计算？",type:"data"},
+        {q:"你喜欢UI、界面设计？",type:"art"},
+        {q:"你喜欢新能源、可持续？",type:"env"},
+        {q:"你擅长规划、安排项目？",type:"bus"},
+        {q:"你喜欢语言、跨文化？",type:"soc"},
+        {q:"你喜欢医学、健康？",type:"bio"},
+        {q:"你喜欢数据图表、可视化？",type:"data"},
+        {q:"你喜欢算法、程序效率？",type:"tech"},
+        {q:"你喜欢创业、商业计划？",type:"bus"},
+        {q:"你喜欢动手解决工程问题？",type:"tech"},
+        {q:"你喜欢气象、气候变化？",type:"env"}
+    ];
+
+    // ==============================================
+    // 专业库（按类型匹配）
+    // ==============================================
+    const majorMap = {
+        tech:["计算机科学与技术","软件工程","人工智能","数据科学","机械工程","电子信息工程"],
+        data:["数据科学","统计学","应用数学","金融工程","商业分析","大数据技术"],
+        bio:["生物科学","生物医学工程","临床医学","环境科学","生态学","药学"],
+        env:["环境科学","海洋科学","地理信息科学","新能源科学与工程","生态学"],
+        bus:["经济学","金融学","工商管理","国际商务","市场营销","会计学"],
+        art:["视觉传达设计","数字媒体艺术","工业设计","交互设计","艺术管理"],
+        soc:["心理学","社会学","公共管理","教育学","国际关系","新闻学"]
+    };
+
+    // ==============================================
+    // 院校库（按专业+成绩匹配）
+    // ==============================================
+    const schoolMap = {
+        顶尖:{
+            tech:["麻省理工MIT","斯坦福大学","加州理工","卡内基梅隆"],
+            data:["斯坦福","哈佛大学","芝加哥大学","牛津大学"],
+            bus:["宾夕法尼亚大学沃顿","伦敦政经LSE","纽约大学","新加坡国立"],
+            bio:["约翰霍普金斯","剑桥大学","加州伯克利","帝国理工"],
+            art:["罗德岛设计学院","帕森斯","伦敦艺术大学"],
+            env:["加州伯克利","耶鲁大学","苏黎世联邦理工"]
+        },
+        优质:{
+            tech:["加州大学圣地亚哥","华盛顿大学","多伦多大学","香港科技大学"],
+            data:["密歇根大学","英属哥伦比亚大学","悉尼大学"],
+            bus:["香港大学","曼彻斯特大学","不列颠哥伦比亚大学"],
+            bio:["杜克大学","阿姆斯特丹大学","墨尔本大学"],
+            art:["加州艺术大学","米兰理工","香港理工"],
+            env:["阿姆斯特丹大学","代尔夫特理工","香港大学"]
+        },
+        稳妥:{
+            tech:["俄亥俄州立","普渡大学","莫纳什大学"],
+            data:["昆士兰大学","利兹大学","南安普顿大学"],
+            bus:["伯明翰大学","格拉斯哥大学","奥克兰大学"],
+            bio:["卡尔加里大学","渥太华大学","利物浦大学"],
+            art:["创意艺术大学","科廷大学","斯威本大学"],
+            env:["格里菲斯大学","纽卡斯尔大学","萨塞克斯大学"]
+        }
+    };
+
+    // ==============================================
+    // 职业库（按专业匹配）
+    // ==============================================
+    const careerMap = {
+        tech:["软件工程师","AI算法工程师","嵌入式工程师","后端开发工程师"],
+        data:["数据分析师","数据科学家","商业分析师","统计师"],
+        bio:["生物研究员","临床医生","医药研发","环境工程师"],
+        env:["环境顾问","新能源工程师","生态规划师","可持续发展专家"],
+        bus:["金融分析师","管理咨询师","市场营销经理","投资顾问"],
+        art:["UI/UX设计师","视觉设计师","产品设计师","创意总监"],
+        soc:["心理咨询师","公共关系师","人力资源","教师"]
+    };
+
+    // ==============================================
+    // 薪资库
+    // ==============================================
+    const salaryMap = {
+        tech:"应届20-35万 · 资深80-150万",
+        data:"应届22-35万 · 资深70-130万",
+        bio:"应届15-25万 · 资深50-90万",
+        env:"应届15-25万 · 资深50-80万",
+        bus:"应届20-40万 · 资深80-150万",
+        art:"应届12-25万 · 资深40-80万",
+        soc:"应届12-25万 · 资深40-80万"
+    };
+
+    // ==============================================
+    // 全局状态
+    // ==============================================
+    let current = 0;
+    let answers = Array(questions.length).fill(null);
+    let score = {tech:0, data:0, bus:0, bio:0, env:0, art:0, soc:0};
+    let topType = "tech";
+
+    // ==============================================
+    // 渲染题目
+    // ==============================================
+    const qtxt = document.getElementById("question");
+    const opts = document.getElementById("options");
+    const qnum = document.getElementById("qnum");
+    const nextBtn = document.getElementById("next");
+    const prevBtn = document.getElementById("prev");
+
+    function render() {
+        qnum.innerText = `第${current+1}/30题`;
+        qtxt.innerText = questions[current].q;
+        opts.innerHTML = "";
+        const items = ["非常符合","比较符合","一般","不太符合","完全不符合"];
+        items.forEach((t,i)=>{
+            const label = document.createElement("label");
+            label.className = "block p-3 border rounded cursor-pointer hover:bg-blue-50";
+            label.innerHTML = `<input type="radio" name="ans" value="${i}" class="mr-2" ${answers[current]===i?"checked":""}>${t}`;
+            label.onclick = () => {
+                answers[current] = i;
+                let points = [4,3,2,1,0][i];
+                score[questions[current].type] += points;
+            };
+            opts.appendChild(label);
+        });
+        prevBtn.disabled = current === 0;
+        nextBtn.innerText = current === questions.length-1 ? "提交测评" : "下一题";
+    }
+
+    // ==============================================
+    // 计算结果
+    // ==============================================
+    function calcResult() {
+        topType = Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
+    }
+
+    // ==============================================
+    // 步骤跳转
+    // ==============================================
+    function goStep(n) {
+        document.querySelectorAll("[id^=step]").forEach(e=>e.classList.add("hidden"));
+        if(n===2) calcResult();
+        if(n===2) showAP();
+        if(n===4) showMajor();
+        if(n===5) showSchool();
+        if(n===6) showCareer();
+        if(n===7) showSalary();
+        document.getElementById("step"+n).classList.remove("hidden");
+    }
+
+    // ==============================================
+    // 显示AP
+    // ==============================================
+    function showAP() {
+        const apList = {
+            tech:["AP微积分BC","AP计算机科学A","AP物理C"],
+            data:["AP微积分BC","AP统计学","AP计算机科学"],
+            bus:["AP微观经济","AP宏观经济","AP统计学"],
+            bio:["AP生物","AP化学","AP环境科学"],
+            env:["AP环境科学","AP化学","AP物理"],
+            art:["AP艺术与设计","AP艺术史","AP心理学"],
+            soc:["AP心理学","AP历史","AP英语语言"]
+        };
+        const apDiv = document.getElementById("apResult");
+        apDiv.innerHTML = apList[topType].map(i=>`<div class="p-4 border rounded bg-blue-50">${i}</div>`).join('');
+    }
+
+    // ==============================================
+    // 显示专业
+    // ==============================================
+    function showMajor() {
+        const list = majorMap[topType];
+        const select = list.sort(()=>Math.random()-0.5).slice(0,6);
+        document.getElementById("majorResult").innerHTML = select.map(m=>`<div class="p-3 border rounded">${m}</div>`).join('');
+    }
+
+    // ==============================================
+    // 显示院校
+    // ==============================================
+    function showSchool() {
+        let toefl = parseInt(document.getElementById("toefl").value) || 0;
+        let level = "稳妥";
+        if(toefl>=105) level="顶尖";
+        else if(toefl>=90) level="优质";
+        
+        const list = schoolMap[level][topType] || [];
+        document.getElementById("schoolResult").innerHTML = list.map(s=>`<div class="p-3 border rounded">${s}</div>`).join('');
+    }
+
+    // ==============================================
+    // 显示职业
+    // ==============================================
+    function showCareer() {
+        const list = careerMap[topType];
+        const select = list.sort(()=>Math.random()-0.5).slice(0,6);
+        document.getElementById("careerResult").innerHTML = select.map(c=>`<div class="p-3 border rounded">${c}</div>`).join('');
+    }
+
+    // ==============================================
+    // 显示薪资 & ROI
+    // ==============================================
+    function showSalary() {
+        document.getElementById("salaryResult").innerText = salaryMap[topType];
+        let roi = {tech:"120%",data:"110%",bus:"130%",bio:"65%",env:"60%",art:"55%",soc:"55%"}[topType];
+        document.getElementById("roiResult").innerText = `留学投资回报率（5年）：${roi}`;
+    }
+
+    // ==============================================
+    // 按钮事件
+    // ==============================================
+    nextBtn.onclick = () => {
+        if(current === questions.length-1) { goStep(2); return; }
+        current++; render();
+    };
+    prevBtn.onclick = () => { if(current>0) { current--; render(); } };
+
+    function resetAll() {
+        current=0; answers.fill(null);
+        score={tech:0,data:0,bus:0,bio:0,env:0,art:0,soc:0};
+        goStep(1); render();
+    }
+
+    render();
+</script>
+</body>
+</html>
